@@ -228,7 +228,7 @@ def query_feed(feed_id: int) -> FeedGenerator:
             fe = fg.add_entry()
             digest_id = uuid.uuid5(config.namespace_uuid, f'{feed_id}:{period_index}')
             fe.id(f'urn:uuid:{digest_id}')
-            fe.title(f'{feed.name} Drop #{period_index + config.max_drops}')
+            fe.title(f'{feed.name} #{period_index + config.max_drops}')
             fe.published(max_published)
             fe.updated(max_published)
             if config.base_url:
@@ -258,7 +258,7 @@ def query_feed(feed_id: int) -> FeedGenerator:
             digest_raw_id = f'{feed_id}:{dt.datetime_to_iso(max_published, convert_to_utc=False)}'
             digest_id = uuid.uuid5(config.namespace_uuid, digest_raw_id)
             fe.id(f'urn:uuid:{digest_id}')
-            fe.title(f'{feed.name} Drop for {dt.humanize_datetime(max_published)}')
+            fe.title(f'{feed.name} {dt.humanize_datetime(max_published)}')
             fe.published(max_published)
             fe.updated(max_published)
             if config.base_url:

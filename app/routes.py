@@ -32,7 +32,8 @@ def add_routes(app: FastAPI):
         poll_states = state.poll_states.all()
         return templates.TemplateResponse(request, "feeds.html", {
             'feeds': feeds,
-            'poll_states': poll_states
+            'poll_states': poll_states,
+            'config': config
         })
 
     @app.get("/feeds/new", response_class=HTMLResponse)

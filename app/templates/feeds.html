@@ -22,10 +22,10 @@
                 {{ feed.name }}
             </td>
             <td class="has-text-left">
-                <a href="/feeds/feed/{{ feed_id }}/drip.atom">link</a>
+                <a href="{{ config.base_url or '' }}/feeds/feed/{{ feed_id }}/drip.atom">link</a>
             </td>
             <td class="has-text-left">
-                <a href="/feeds/feed/{{ feed_id }}/drip.rss">link</a>
+                <a href="{{ config.base_url or '' }}/feeds/feed/{{ feed_id }}/drip.rss">link</a>
             </td>
             <td>
                 {{ poll_state.last_polled_at | reltime if poll_state else 'Never' }}

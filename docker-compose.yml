@@ -1,0 +1,13 @@
+services:
+  drip:
+    image: haumea/drip:latest
+    container_name: drip
+    ports:
+      - 5001:5001
+    volumes:
+      - drip-data:/data
+    environment:
+      DRIP_BASE_URL: http://host.docker.internal:5001
+
+volumes:
+  drip-data:

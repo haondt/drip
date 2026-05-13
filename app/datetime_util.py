@@ -99,7 +99,7 @@ def datetime_to_iso(dt: datetime, convert_to_utc: bool = True) -> str:
     return dt.isoformat()
 
 def humanize_datetime(dt: datetime) -> str:
-    return f'{dt:%A, %B %d, %Y at %I:%M %p %Z}'
+    return f'{dt:%A, %B %d, %Y %I:%M %p %Z}'
 
 def iso_to_datetime(s: str) -> datetime:
     dt = datetime.fromisoformat(s)
