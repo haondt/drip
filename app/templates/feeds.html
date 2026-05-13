@@ -8,6 +8,7 @@
         <tr>
             <td></td>
             <td>atom url</td>
+            <td>rss url</td>
             <td>last polled</td>
             <td>next poll</td>
             <td></td>
@@ -22,6 +23,9 @@
             </td>
             <td class="has-text-left">
                 <a href="/feeds/feed/{{ feed_id }}/drip.atom">link</a>
+            </td>
+            <td class="has-text-left">
+                <a href="/feeds/feed/{{ feed_id }}/drip.rss">link</a>
             </td>
             <td>
                 {{ poll_state.last_polled_at | reltime if poll_state else 'Never' }}

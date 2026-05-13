@@ -192,6 +192,7 @@ def query_feed(feed_id: int) -> FeedGenerator:
     fg = FeedGenerator()
     fg.id(f'urn:uuid:{uuid.uuid5(config.namespace_uuid, str(feed_id))}')
     fg.title(feed.metadata.title or feed.name)
+    fg.description(feed.metadata.subtitle or feed.name)
     if feed.metadata.links:
         for link in feed.metadata.links:
             fg.link(**{ k: v for k, v in link.model_dump().items() if v is not None and k in ['href', 'rel', 'type']})

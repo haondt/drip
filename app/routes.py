@@ -130,8 +130,13 @@ def add_routes(app: FastAPI):
         fg = drip.query_feed(feed_id)
         xml = fg.atom_str(pretty=True)
         return Response(content=xml, media_type="application/atom+xml")
+
+    @app.get("/feeds/feed/{feed_id}/drip.rss")
+    async def get_feed_rss(feed_id: int):
+        fg = drip.query_feed(feed_id)
+        xml = fg.rss_str(pretty=True)
+        return Response(content=xml, media_type="application/rss+xml")
     
-        digest_id = uuid.uuid5(config.namespace_uuid, f'{feed_id}:{period_index}')
     @app.get("/drops/drop/{drop_id}")
     async def get_drop_html(drop_id: str):
         feed_id, index = drop_id.split(':', 1)
