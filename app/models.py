@@ -76,4 +76,8 @@ class FeedEntry(BaseModel):
 
         return hashlib.sha256(encoded).hexdigest()
 
-
+class FeedPollState(BaseModel):
+    last_polled_at: str | None = None
+    next_poll: str | None = None
+    poll_interval_seconds: float
+    consecutive_empty: int = Field(default=0)

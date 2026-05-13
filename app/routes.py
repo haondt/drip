@@ -5,6 +5,7 @@ from fastapi.responses import HTMLResponse, Response, FileResponse, RedirectResp
 from fastapi.staticfiles import StaticFiles
 import logging
 from .state import state
+from . import scheduler
 import asyncio
 from .config import config
 import os
@@ -12,11 +13,14 @@ from . import datetime_util as dt
 import html
 from .models import Feed, FeedEntry
 from . import drip
+from .jinja_filters import add_filters
 
 _logger = logging.getLogger(__name__)
 
 def add_routes(app: FastAPI):
     templates = Jinja2Templates(directory="app/templates")
+    add_filters(templates)
+
 
     @app.get("/", response_class=HTMLResponse)
     async def root(request: Request):
@@ -25,8 +29,10 @@ def add_routes(app: FastAPI):
     @app.get("/feeds", response_class=HTMLResponse)
     async def feeds(request: Request):
         feeds = state.feeds.all()
+        poll_states = state.poll_states.all()
         return templates.TemplateResponse(request, "feeds.html", {
-            'feeds': feeds
+            'feeds': feeds,
+            'poll_states': poll_states
         })
 
     @app.get("/feeds/new", response_class=HTMLResponse)
@@ -115,6 +121,7 @@ def add_routes(app: FastAPI):
 
     @app.post("/feeds/feed/{feed_id}/refresh", response_class=HTMLResponse)
     async def refresh_feed(request: Request, feed_id: int):
+        scheduler.record_poll(feed_id)
         drip.refresh_feed(feed_id)
         return Response(status_code=status.HTTP_204_NO_CONTENT)
 

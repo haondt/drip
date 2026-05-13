@@ -58,6 +58,38 @@ def timedelta_to_str(td: timedelta) -> str:
 
     return "".join(parts)
 
+def humanize_timedelta(td: timedelta, precise: bool = False) -> str:
+    if precise:
+        return timedelta_to_str(td)
+    total = int(td.total_seconds())
+    days, rem = divmod(total, 86400)
+    if days:
+        hours = rem // 3600
+        return f"{days}d" if hours < 12 else f"{days + 1}d"
+    hours, rem = divmod(rem, 3600)
+    if hours:
+        minutes = rem // 60
+        return f"{hours}h" if minutes < 30 else f"{hours + 1}h"
+    minutes, seconds = divmod(rem, 60)
+    if minutes:
+        return f"{minutes}m" if seconds < 30 else f"{minutes + 1}m"
+    return f"{seconds}s"
+
+def humanize_timedelta2(td: timedelta, precise: bool = False) -> str:
+    if precise:
+        return timedelta_to_str(td)
+    total = int(td.total_seconds())
+    days, rem = divmod(total, 86400)
+    if days:
+        return f"{days}d"
+    hours, rem = divmod(rem, 3600)
+    if hours:
+        return f"{hours}h"
+    minutes, seconds = divmod(rem, 60)
+    if minutes:
+        return f"{minutes}m"
+    return f"{seconds}s"
+
 
 def datetime_to_iso(dt: datetime, convert_to_utc: bool = True) -> str:
     if dt.tzinfo is None:

@@ -36,6 +36,14 @@ class State:
                         ON DELETE CASCADE
                 )
             ''')
+            c.execute('''
+                CREATE TABLE IF NOT EXISTS feed_poll_states  (
+                    feed_id INTEGER PRIMARY KEY,
+                    data TEXT NOT NULL,
+                    FOREIGN KEY (feed_id) REFERENCES feeds(id)
+                        ON DELETE CASCADE
+                )
+            ''')
             conn.commit()
 
 
@@ -96,7 +104,7 @@ class State:
             with self.state._lock, self.state._get_conn() as conn:
                 c = conn.cursor()
                 c.execute('SELECT id FROM feeds')
-                return list(c.fetchall())
+                return [row[0] for row in c.fetchall()]
 
     @property
     def feeds(self) -> State.FeedDict:
@@ -129,6 +137,13 @@ class State:
                 raise ValueError(f'FeedEntry {composite_key[0]},{composite_key[1]} not found.')
             return feed_entry
 
+        def count(self, feed_id: int):
+            with self.state._lock, self.state._get_conn() as conn:
+                c = conn.cursor()
+                c.execute('SELECT COUNT(*) FROM feed_entries WHERE feed_id = ?', (feed_id,))
+                return c.fetchone()[0]
+
+
         def query(self, feed_id: int, min_published: str | None = None, max_published: str | None = None) -> list[FeedEntry]:
             conditions = ['feed_id = ?']
             params: list = [feed_id]
@@ -150,6 +165,47 @@ class State:
     @property
     def feed_entries(self) -> State.FeedEntryDict:
         return self.FeedEntryDict(self)
+
+    class FeedPollStateDict:
+        def __init__(self, state: State):
+            self.state = state
+
+        def get(self, feed_id: int) -> FeedPollState | None:
+            with self.state._lock, self.state._get_conn() as conn:
+                c = conn.cursor()
+                c.execute(
+                    'SELECT data FROM feed_poll_states WHERE feed_id = ?',
+                    (feed_id,)
+                )
+                row = c.fetchone()
+                if row:
+                    return FeedPollState.model_validate_json(row[0])
+            return None
+
+        def __setitem__(self, feed_id: int, poll_state: FeedPollState):
+            with self.state._lock, self.state._get_conn() as conn:
+                c = conn.cursor()
+                c.execute(
+                    '''
+                    INSERT INTO feed_poll_states (feed_id, data) VALUES (?, ?)
+                    ON CONFLICT(feed_id) DO UPDATE SET data = excluded.data
+                    ''',
+                    (feed_id, poll_state.model_dump_json())
+                )
+
+        def all(self) -> dict[int, FeedPollState]:
+            with self.state._lock, self.state._get_conn() as conn:
+                c = conn.cursor()
+                c.execute('SELECT feed_id, data FROM feed_poll_states')
+
+                return {
+                    row[0]: FeedPollState.model_validate_json(row[1])
+                    for row in c.fetchall()
+                }
+
+    @property
+    def poll_states(self) -> State.FeedPollStateDict:
+        return self.FeedPollStateDict(self)
 
 
 

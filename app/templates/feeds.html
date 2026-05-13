@@ -4,14 +4,30 @@
     <a hx-boost="true" href="/feeds/new/" class="button is-primary">Create Feed</a>
 </section>
 <table class="table is-fullwidth">
+    <thead>
+        <tr>
+            <td></td>
+            <td>atom url</td>
+            <td>last polled</td>
+            <td>next poll</td>
+            <td></td>
+        </tr>
+    </thead>
     <tbody>
         {% for feed_id, feed in feeds.items() %}
+        {% set poll_state = poll_states.get(feed_id) %}
         <tr>
             <td class="has-text-left">
                 {{ feed.name }}
             </td>
             <td class="has-text-left">
-                <a href="/feeds/feed/{{ feed_id }}/drip.atom">atom url</a>
+                <a href="/feeds/feed/{{ feed_id }}/drip.atom">link</a>
+            </td>
+            <td>
+                {{ poll_state.last_polled_at | reltime if poll_state else 'Never' }}
+            </td>
+            <td>
+                {{ poll_state.next_poll | reltime if poll_state else 'Never' }}
             </td>
             <td class="buttons is-right">
                 <button class="button" hx-swap="none" hx-post="/feeds/feed/{{ feed_id }}/refresh"
