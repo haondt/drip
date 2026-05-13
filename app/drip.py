@@ -1,5 +1,6 @@
 import json
 import math
+from string.templatelib import convert
 import feedparser
 from .state import state
 from .models import *
@@ -158,16 +159,24 @@ def build_digest_html(feed: Feed, entries: list[FeedEntry]):
 
     return "".join(html)
 
-def get_drop_html(feed_id: int, period_index: int) -> str:
+def get_drop_html(feed_id: int, index: str) -> str:
     feed = state.feeds[feed_id]
 
-    created = dt.iso_to_datetime(feed.created)
-    period = dt.parse_timespan(feed.period)
+    if dt.validate_timespan_str(feed.period):
+        period_index = int(index)
+        created = dt.iso_to_datetime(feed.created)
+        period = dt.parse_timespan(feed.period)
 
-    now = dt.now_datetime()
+        now = dt.now_datetime()
 
-    min_published = created + period_index * period
-    max_published = created + (period_index + 1) * period
+        min_published = created + period_index * period
+        max_published = created + (period_index + 1) * period
+
+    else:
+         max_published = dt.iso_to_datetime(index)
+         seeker = dt.parse_cron_schedule(feed.period, max_published)
+         min_published = seeker.prev()
+         print(max_published, min_published)
 
     entries = state.feed_entries.query(
         feed_id,
@@ -195,35 +204,68 @@ def query_feed(feed_id: int) -> FeedGenerator:
     if feed.metadata.updated:
         fg.updated(feed.metadata.updated)
 
-    period = dt.parse_timespan(feed.period)
-    now = dt.now_datetime()
-    created = dt.iso_to_datetime(feed.created)
-    current_period_index = (now - created) // period
-    oldest_period_index = current_period_index - config.max_drops + 1
+    if dt.validate_timespan_str(feed.period):
+        period = dt.parse_timespan(feed.period)
+        now = dt.now_datetime()
+        created = dt.iso_to_datetime(feed.created)
+        current_period_index = (now - created) // period
+        oldest_period_index = current_period_index - config.max_drops + 1
 
-    # intentionally omitting the current period, as we cant emit it until the period completes
-    for period_index in range(oldest_period_index, current_period_index):
-        min_published = created + period_index * period
-        max_published = created + (period_index + 1) * period
-        entries = state.feed_entries.query(
-            feed_id,
-            dt.datetime_to_iso(min_published),
-            dt.datetime_to_iso(max_published),
-        )
+        # intentionally omitting the current period, as we cant emit it until the period completes
+        for period_index in range(oldest_period_index, current_period_index):
+            min_published = created + period_index * period
+            max_published = created + (period_index + 1) * period
+            entries = state.feed_entries.query(
+                feed_id,
+                dt.datetime_to_iso(min_published),
+                dt.datetime_to_iso(max_published),
+            )
 
-        if len(entries) == 0:
-            continue
+            if len(entries) == 0:
+                continue
 
-        fe = fg.add_entry()
-        digest_id = uuid.uuid5(config.namespace_uuid, f'{feed_id}:{period_index}')
-        fe.id(f'urn:uuid:{digest_id}')
-        fe.title(f'{feed.name} Drop #{period_index + config.max_drops}')
-        fe.published(max_published)
-        fe.updated(max_published)
-        if config.base_url:
-            fe.link(link={'href': config.base_url + f'/drops/drop/{feed_id}:{period_index}', 'rel': 'alternate', 'type': 'text/html'})
+            fe = fg.add_entry()
+            digest_id = uuid.uuid5(config.namespace_uuid, f'{feed_id}:{period_index}')
+            fe.id(f'urn:uuid:{digest_id}')
+            fe.title(f'{feed.name} Drop #{period_index + config.max_drops}')
+            fe.published(max_published)
+            fe.updated(max_published)
+            if config.base_url:
+                fe.link(link={'href': config.base_url + f'/drops/drop/{feed_id}:{period_index}', 'rel': 'alternate', 'type': 'text/html'})
 
-        content = build_digest_html(feed, entries)
-        fe.content(content=content, type='text/html')
+            content = build_digest_html(feed, entries)
+            fe.content(content=content, type='text/html')
+    else:
+        now = dt.now_datetime(feed.creation_tz)
+        seeker = dt.parse_cron_schedule(feed.period, now)
+        # intentionally omitting the current (first) period, as we cant emit it until the period completes
+        max_published = seeker.prev()
+        for _ in range(config.max_drops):
+            min_published = seeker.prev()
+
+            entries = state.feed_entries.query(
+                feed_id,
+                dt.datetime_to_iso(min_published),
+                dt.datetime_to_iso(max_published),
+            )
+
+            if len(entries) == 0:
+                max_published = min_published
+                continue
+
+            fe = fg.add_entry()
+            digest_raw_id = f'{feed_id}:{dt.datetime_to_iso(max_published, convert_to_utc=False)}'
+            digest_id = uuid.uuid5(config.namespace_uuid, digest_raw_id)
+            fe.id(f'urn:uuid:{digest_id}')
+            fe.title(f'{feed.name} Drop for {dt.humanize_datetime(max_published)}')
+            fe.published(max_published)
+            fe.updated(max_published)
+            if config.base_url:
+                fe.link(link={'href': config.base_url + f'/drops/drop/{digest_raw_id}', 'rel': 'alternate', 'type': 'text/html'})
+
+            content = build_digest_html(feed, entries)
+            fe.content(content=content, type='text/html')
+
+            max_published = min_published
 
     return fg

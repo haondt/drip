@@ -1,6 +1,9 @@
 import re
 from datetime import timedelta, datetime, UTC
+from zoneinfo import ZoneInfo
 from time import struct_time
+from cron_converter import Cron
+from cron_converter.sub_modules.seeker import Seeker
 
 _timespan_pattern = re.compile(r"^\s*(?:(?P<d>[0-9]+)d)?\s*(?:(?P<h>[0-9]+)h)?\s*(?:(?P<m>[0-9]+)m)?\s*(?:(?P<s>[0-9]+)s)?\s*$")
 def parse_timespan(s) -> timedelta:
@@ -14,11 +17,27 @@ def parse_timespan(s) -> timedelta:
         minutes=int(gd['m'] or 0),
         seconds=int(gd['s'] or 0)
     )
+
+def parse_cron_schedule(s: str, dt: datetime) -> Seeker:
+    c = Cron(s)
+    return c.schedule(dt)
+
+
+def validate_timespan_str(s) -> bool:
+    return try_parse_timespan(s) is not None
+
 def try_parse_timespan(s) -> timedelta | None:
     try:
         return parse_timespan(s)
     except:
         return None
+
+def validate_cron_str(s) -> bool:
+    try:
+        Cron(s)
+        return True
+    except:
+        return False
 
 def timedelta_to_str(td: timedelta) -> str:
     total = int(td.total_seconds())
@@ -40,10 +59,15 @@ def timedelta_to_str(td: timedelta) -> str:
     return "".join(parts)
 
 
-def datetime_to_iso(dt: datetime) -> str:
+def datetime_to_iso(dt: datetime, convert_to_utc: bool = True) -> str:
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=UTC)
-    return dt.astimezone(UTC).isoformat()
+    if convert_to_utc:
+        return dt.astimezone(UTC).isoformat()
+    return dt.isoformat()
+
+def humanize_datetime(dt: datetime) -> str:
+    return f'{dt:%A, %B %d, %Y at %I:%M %p %Z}'
 
 def iso_to_datetime(s: str) -> datetime:
     dt = datetime.fromisoformat(s)
@@ -65,8 +89,8 @@ def tuple9_to_datetime(value: tuple | struct_time) -> datetime:
 def now_iso() -> str:
     return datetime_to_iso(now_datetime())
 
-def now_datetime() -> datetime:
-    return datetime.now(UTC)
+def now_datetime(tz: str = "Etc/UTC") -> datetime:
+    return datetime.now(ZoneInfo(tz))
 
 
 def normalize_datetime(value) -> str:

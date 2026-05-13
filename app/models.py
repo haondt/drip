@@ -23,6 +23,7 @@ class Feed(BaseModel):
     url: str
     period: str
     created: str
+    creation_tz: str
     metadata: FeedMetadata = FeedMetadata()
 
 

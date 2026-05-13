@@ -40,10 +40,10 @@ def add_routes(app: FastAPI):
             errors['name'] = 'The name cannot be empty'
         if not form.get("url"):
             errors['url'] = 'The url cannot be empty'
+        if not form.get("tz"):
+            errors['tz'] = 'The timezone was not supplied'
         period = form.get('period')
-        if period:
-            period = dt.try_parse_timespan(period)
-        if not period:
+        if not (dt.validate_timespan_str(period) or dt.validate_cron_str(period)):
             errors['period'] = 'Cannot parse timespan'
 
         return errors
@@ -58,8 +58,9 @@ def add_routes(app: FastAPI):
             feed_id = state.feeds.add(Feed(
                 name=form['name'],
                 url=form['url'],
-                period=dt.timedelta_to_str(dt.normalize_timedelta(form['period'])),
-                created=dt.now_iso()
+                period=form['period'],
+                created=dt.now_iso(),
+                creation_tz=form['tz']
             ))
             headers={'Hx-Push-Url': f'/feeds/feed/{feed_id}'}
             message = { 'text': 'Feed created.'}
@@ -98,6 +99,7 @@ def add_routes(app: FastAPI):
             feed.name = form['name']
             feed.url = form['url']
             feed.period = form['period']
+            feed.creation_tz=form['tz']
 
             state.feeds[feed_id] = feed
             message = { 'text': 'Feed updated.' }
@@ -125,8 +127,8 @@ def add_routes(app: FastAPI):
         digest_id = uuid.uuid5(config.namespace_uuid, f'{feed_id}:{period_index}')
     @app.get("/drops/drop/{drop_id}")
     async def get_drop_html(drop_id: str):
-        feed_id, index = drop_id.split(':')
-        html = drip.get_drop_html(int(feed_id), int(index))
+        feed_id, index = drop_id.split(':', 1)
+        html = drip.get_drop_html(int(feed_id), index)
         return Response(content=html, media_type="text/html")
 
     @app.get("/hc")
