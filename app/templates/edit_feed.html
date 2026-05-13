@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<form hx-post hx-swap="outerHTML" hx-select="form" class="box"
+    _="
+       on htmx:beforeRequest toggle .is-loading on the first <button.is-primary/> in me end
+       on htmx:afterRequest toggle .is-loading on the first <button.is-primary/> in me end
+    ">
+    <div class="field">
+        <label class="label">Name</label>
+        <div class="control">
+            <input id="edit-feed-name-input" name="name" class="input" type="text" placeholder="New Feed" {% if feed %}value="{{ feed.name }}"{% endif %} hx-preserve>
+        </div>
+        {% if "name" in errors %}
+        <p class="help is-danger">{{ errors.name }}</p>
+        {% endif %}
+    </div>
+    <div class="field">
+        <label class="label">Url</label>
+        <div class="control">
+            <input id="edit-feed-url-input" name="url" class="input" type="text" {% if feed %}value="{{ feed.url }}"{% endif %} hx-preserve>
+        </div>
+        {% if "url" in errors %}
+        <p class="help is-danger">{{ errors.url }}</p>
+        {% endif %}
+    </div>
+    <div class="field">
+        <label class="label">Aggregation Period</label>
+        <div class="control">
+            <input id="edit-feed-url-period" name="period" class="input" type="text" placeholder="1d 12h" {% if feed %}value="{{ feed.period }}"{% endif %} hx-preserve>
+        </div>
+        {% if "period" in errors %}
+        <p class="help is-danger">{{ errors.period }}</p>
+        {% endif %}
+    </div>
+    <div class="field is-grouped">
+        <div class="control">
+            <div class="buttons">
+                <button class="button is-primary">Save</button>
+                <a class="button" href='/feeds' hx-boost="true">Return</a>
+            </div>
+        </div>
+    </div>
+    {% if message %}
+    <p class="help" _="on load wait 1s then remove me">{{ message.text }}</p>
+    {% endif %}
+</form>
+{% endblock %}

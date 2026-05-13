@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="block">
+    <a hx-boost="true" href="/feeds/new/" class="button is-primary">Create Feed</a>
+</section>
+<table class="table is-fullwidth">
+    <tbody>
+        {% for feed_id, feed in feeds.items() %}
+        <tr>
+            <td class="has-text-left">
+                {{ feed.name }}
+            </td>
+            <td class="has-text-left">
+                <a href="/feeds/feed/{{ feed_id }}/drip.atom">atom url</a>
+            </td>
+            <td class="buttons is-right">
+                <button class="button" hx-swap="none" hx-post="/feeds/feed/{{ feed_id }}/refresh"
+                    _="
+                        on htmx:beforeRequest toggle .is-loading on me end
+                        on htmx:afterRequest toggle .is-loading on me end
+                    "
+                    hx-boost="true">Refresh</button>
+                    <a class="button" href="/feeds/feed/{{ feed_id }}" hx-boost="true">Edit</a>
+                    <button hx-delete="/feeds/feed/{{ feed_id }}" hx-confirm='Delete feed "{{ feed.name }}?"'
+                        _="on htmx:afterRequest[detail.xhr.status==204] remove the closest <tr/> end"
+                        class="button is-danger">Delete</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

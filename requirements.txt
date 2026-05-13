@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+jinja2
+python-dateutil
+python-multipart
+feedparser
+feedgen2
+requests
