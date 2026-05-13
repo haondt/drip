@@ -1,0 +1,21 @@
+tasks:
+  - type: docker-build
+    image: drip
+    auto:
+      - source: push
+        has_tag: true
+        tag_source: tag
+      - source: push
+        has_tag: true
+        tag_source: latest
+    context: .
+    file: Dockerfile
+    registries:
+      - gitlab
+      - docker-hub
+    labels:
+      source: https://gitlab.com/haondt/drip
+      url: https://gitlab.com/haondt/drip/-/blob/main/README.md
+      title: drip
+      image.base.name: docker.io/library/python:3.14.5-slim
+
