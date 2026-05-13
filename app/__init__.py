@@ -31,7 +31,7 @@ async def lifespan(app: FastAPI):
             pass
 
 def create_app():
-    app = FastAPI(title="FastAPI + HTMX + Bulma + WebSockets", version="1.0.0", lifespan=lifespan)
+    app = FastAPI(title="FastAPI + HTMX + Bulma + WebSockets", version="1.0.0", redirect_slashes=False, lifespan=lifespan)
     logging.basicConfig(format=config.log_template, level=logging.getLevelName(config.log_level))
     routes.add_routes(app)
     return app
