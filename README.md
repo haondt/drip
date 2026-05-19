@@ -45,25 +45,28 @@ drip is configured with environment variables. The only ones you probably need t
 <details>
 <summary>Expand to see all environment variables</summary>
 
-| Variable                            | Default         | Description                                           |
-| ----------------------------------- | --------------- | ----------------------------------------------------- |
-| `DRIP_BASE_URL`                     | —               | Public URL of this instance, used in feed entry links |
-| `DRIP_DB_PATH`                      | `/data/drip.db` | Path to SQLite database                               |
-| `DRIP_ENVIRONMENT`                  | `prod`          | Set to `dev` for auto-reload                          |
-| `DRIP_SERVER_PORT`                  | `5001`          | Port to listen on                                     |
-| `DRIP_LOG_LEVEL`                    | `INFO`          | Log level                                             |
-| `DRIP_LOG_TEMPLATE`                 | —               | Log format string                                     |
-| `DRIP_MAX_DROPS`                    | `10`            | Number of digest episodes to retain per feed          |
-| `DRIP_NAMESPACE_UUID`               | `60a76c80-...`  | UUID namespace for stable feed/entry IDs              |
-| `DRIP_FEED_READ_TIMEOUT`            | `30s`           | HTTP timeout for upstream feed requests               |
-| `DRIP_FEED_READ_DEFAULT_INTERVAL`   | `15m`           | Starting poll interval for new feeds                  |
-| `DRIP_FEED_READ_MIN_INTERVAL`       | `5m`            | Minimum poll interval                                 |
-| `DRIP_FEED_READ_MAX_INTERVAL`       | `24h`           | Maximum poll interval                                 |
-| `DRIP_FEED_READ_BACKOFF_FACTOR`     | `2.0`           | Interval multiplier on empty polls                    |
-| `DRIP_FEED_READ_ACCEL_FACTOR`       | `0.5`           | Interval multiplier on new items                      |
-| `DRIP_FEED_READ_JITTER_FACTOR`      | `0.2`           | ±jitter applied to poll interval                      |
-| `DRIP_FEED_READ_TICK_RATE`          | `30s`           | How often the scheduler checks for due polls          |
-| `DRIP_FEED_EMPTY_BACKOFF_THRESHOLD` | `3`             | Consecutive empty polls before backing off            |
+| Variable                            | Default           | Description                                           |
+| ----------------------------------- | ----------------- | ----------------------------------------------------- |
+| `DRIP_BASE_URL`                     | —                 | Public URL of this instance, used in feed entry links |
+| `DRIP_DB_PATH`                      | `/data/drip.db`   | Path to SQLite database                               |
+| `DRIP_ENVIRONMENT`                  | `prod`            | Set to `dev` for auto-reload                          |
+| `DRIP_SERVER_PORT`                  | `5001`            | Port to listen on                                     |
+| `DRIP_LOG_LEVEL`                    | `INFO`            | Log level                                             |
+| `DRIP_LOG_TEMPLATE`                 | —                 | Log format string                                     |
+| `DRIP_MAX_DROPS`                    | `10`              | Number of digest episodes to retain per feed          |
+| `DRIP_NAMESPACE_UUID`               | `60a76c80-...`    | UUID namespace for stable feed/entry IDs              |
+| `DRIP_DEFAULT_USER_AGENT`           | `(drip/0.1 +...)` | Default value to use for User-Agent header            |
+| `DRIP_FEED_READ_TIMEOUT`            | `30s`             | HTTP timeout for upstream feed requests               |
+| `DRIP_FEED_READ_DEFAULT_INTERVAL`   | `15m`             | Starting poll interval for new feeds                  |
+| `DRIP_FEED_READ_MIN_INTERVAL`       | `5m`              | Minimum poll interval                                 |
+| `DRIP_FEED_READ_MAX_INTERVAL`       | `24h`             | Maximum poll interval                                 |
+| `DRIP_FEED_READ_BACKOFF_FACTOR`     | `2.0`             | Interval multiplier on empty polls                    |
+| `DRIP_FEED_READ_ACCEL_FACTOR`       | `0.5`             | Interval multiplier on new items                      |
+| `DRIP_FEED_READ_JITTER_FACTOR`      | `0.2`             | ±jitter applied to poll interval                      |
+| `DRIP_FEED_READ_TICK_RATE`          | `30s`             | How often the scheduler checks for due polls          |
+| `DRIP_FEED_EMPTY_BACKOFF_THRESHOLD` | `3`               | Consecutive empty polls before backing off            |
+
+The full default value for truncated values can be seen in [config.py](./app/config.py).
 
 </details>
 

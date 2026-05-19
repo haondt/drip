@@ -10,7 +10,7 @@ venv force="false":
 
 [script]
 dev: venv
-    DRIP_BASE_URL=http://host.docker.internal:5001 DRIP_ENVIRONMENT=dev DRIP_DB_PATH=./drip.db {{python}} -m app
+    DRIP_BASE_URL=http://localhost:5001 DRIP_ENVIRONMENT=dev DRIP_DB_PATH=./drip.db {{python}} -m app
 
 db-drop:
     rm drip.db

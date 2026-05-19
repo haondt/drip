@@ -7,7 +7,7 @@ services:
     volumes:
       - drip-data:/data
     environment:
-      DRIP_BASE_URL: http://host.docker.internal:5001
+      DRIP_BASE_URL: http://localhost:5001
 
 volumes:
   drip-data:

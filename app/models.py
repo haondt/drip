@@ -24,6 +24,7 @@ class Feed(BaseModel):
     period: str
     created: str
     creation_tz: str
+    user_agent: str | None = None
     metadata: FeedMetadata = FeedMetadata()
 
 

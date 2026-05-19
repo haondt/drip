@@ -24,6 +24,7 @@ class Config:
         self.max_drops = int(os.getenv('DRIP_MAX_DROPS', 10))
         self.namespace_uuid = uuid.UUID(os.getenv('DRIP_NAMESPACE_UUID', '60a76c80-d399-11d9-b93c-0003939e0af6'))
         self.base_url = os.getenv('DRIP_BASE_URL')
+        self.default_user_agent = os.getenv('DRIP_DEFAULT_USER_AGENT', 'drip/0.1 (+https://github.com/haondt/drip)')
 
         self.feed_read_timeout = dt.parse_timespan(os.getenv('DRIP_FEED_READ_TIMEOUT', '30s'))
         self.feed_read_max_interval = dt.parse_timespan(os.getenv('DRIP_FEED_READ_MAX_INTERVAL', '24h'))

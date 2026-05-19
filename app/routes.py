@@ -39,6 +39,7 @@ def add_routes(app: FastAPI):
     @app.get("/feeds/new", response_class=HTMLResponse)
     async def get_new_feed(request: Request):
         return templates.TemplateResponse(request, "edit_feed.html", {
+            'config': config
         })
 
     def _validate_upsert_feed(form: FormData):
@@ -55,6 +56,14 @@ def add_routes(app: FastAPI):
 
         return errors
 
+    def _normalize_string_or_none(s: str | None) -> str | None:
+        if s is None:
+            return None
+        s = s.strip()
+        if len(s) == 0:
+            return None
+        return s
+
     @app.post("/feeds/new", response_class=HTMLResponse)
     async def create_feed(request: Request):
         form = await request.form()
@@ -67,7 +76,8 @@ def add_routes(app: FastAPI):
                 url=form['url'],
                 period=form['period'],
                 created=dt.now_iso(),
-                creation_tz=form['tz']
+                creation_tz=form['tz'],
+                user_agent=_normalize_string_or_none(form.get('user_agent')),
             ))
             headers={'Hx-Push-Url': f'/feeds/feed/{feed_id}'}
             message = { 'text': 'Feed created.'}
@@ -77,7 +87,8 @@ def add_routes(app: FastAPI):
 
         return templates.TemplateResponse(request, "edit_feed.html", {
             'errors': errors,
-            'message': message
+            'message': message,
+            'config': config
             }, headers=headers)
 
     @app.get("/feeds/feed/{feed_id}", response_class=HTMLResponse)
@@ -88,7 +99,8 @@ def add_routes(app: FastAPI):
         return templates.TemplateResponse(request, "edit_feed.html", {
             'errors': {},
             'message': {},
-            'feed': feed
+            'feed': feed,
+            'config': config
             })
 
 
@@ -107,12 +119,14 @@ def add_routes(app: FastAPI):
             feed.url = form['url']
             feed.period = form['period']
             feed.creation_tz=form['tz']
+            feed.user_agent=_normalize_string_or_none(form.get('user_agent'))
 
             state.feeds[feed_id] = feed
             message = { 'text': 'Feed updated.' }
         return templates.TemplateResponse(request, "edit_feed.html", {
             'errors': errors,
-            'message': message
+            'message': message,
+            'config': config,
             }, headers=headers)
 
     @app.delete("/feeds/feed/{feed_id}", response_class=HTMLResponse)

@@ -6,13 +6,15 @@ from .state import state
 from .models import *
 from .config import config
 from feedgen.feed import FeedGenerator
-from . import datetime_util as dt 
+from . import datetime_util as dt
 import uuid
 import requests
 
 def refresh_feed(feed_id: int):
     feed = state.feeds[feed_id]
-    resp = requests.get(feed.url, timeout=config.feed_read_timeout.total_seconds())
+    resp = requests.get(feed.url,
+        headers={'User-Agent': feed.user_agent or config.default_user_agent},
+        timeout=config.feed_read_timeout.total_seconds())
     resp.raise_for_status()
     d = feedparser.parse(resp.content)
 
@@ -167,8 +169,6 @@ def get_drop_html(feed_id: int, index: str) -> str:
         created = dt.iso_to_datetime(feed.created)
         period = dt.parse_timespan(feed.period)
 
-        now = dt.now_datetime()
-
         min_published = created + period_index * period
         max_published = created + (period_index + 1) * period
 
@@ -176,7 +176,6 @@ def get_drop_html(feed_id: int, index: str) -> str:
          max_published = dt.iso_to_datetime(index)
          seeker = dt.parse_cron_schedule(feed.period, max_published)
          min_published = seeker.prev()
-         print(max_published, min_published)
 
     entries = state.feed_entries.query(
         feed_id,

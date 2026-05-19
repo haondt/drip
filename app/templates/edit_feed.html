@@ -34,6 +34,15 @@
         <p class="help is-danger">{{ errors.period }}</p>
         {% endif %}
     </div>
+    <div class="field">
+        <label class="label">User Agent</label>
+        <div class="control">
+            <input id="edit-feed-user-agent" name="user_agent" class="input" type="text" placeholder="{{ config.default_user_agent }}" {% if feed and feed.user_agent %}value="{{ feed.user_agent }}"{% endif %} hx-preserve>
+        </div>
+        {% if "user_agent" in errors %}
+        <p class="help is-danger">{{ errors.user_agent }}</p>
+        {% endif %}
+    </div>
     <div class="field is-grouped">
         <div class="control">
             <div class="buttons">
